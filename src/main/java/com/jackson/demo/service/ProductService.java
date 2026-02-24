@@ -1,0 +1,71 @@
+package com.jackson.demo.service;
+
+import com.jackson.demo.dto.request.ProductRequest;
+import com.jackson.demo.dto.response.ProductResponse;
+import com.jackson.demo.entity.Product;
+import com.jackson.demo.exception.ResourceNotFoundException;
+import com.jackson.demo.mapper.ApiMapper;
+import com.jackson.demo.repository.ProductRepository;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final CategoryService categoryService;
+
+    public ProductService(ProductRepository productRepository, CategoryService categoryService) {
+        this.productRepository = productRepository;
+        this.categoryService = categoryService;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> listProducts(String q) {
+        List<Product> products = (q == null || q.isBlank())
+                ? productRepository.findAll()
+                : productRepository.findByNameContainingIgnoreCase(q.trim());
+        return products.stream().map(ApiMapper::toProductResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse getProduct(Long id) {
+        return ApiMapper.toProductResponse(findProduct(id));
+    }
+
+    @Transactional
+    public ProductResponse createProduct(ProductRequest request) {
+        Product product = new Product();
+        applyRequest(product, request);
+        return ApiMapper.toProductResponse(productRepository.save(product));
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(Long id, ProductRequest request) {
+        Product product = findProduct(id);
+        applyRequest(product, request);
+        return ApiMapper.toProductResponse(productRepository.save(product));
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        productRepository.delete(findProduct(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Product findProduct(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
+    }
+
+    private void applyRequest(Product product, ProductRequest request) {
+        product.setName(request.name().trim());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
+        product.setCategory(categoryService.findCategory(request.categoryId()));
+        product.setImageUrls(request.imageUrls().stream().map(String::trim).toList());
+        product.setActive(request.active() == null || request.active());
+    }
+}
