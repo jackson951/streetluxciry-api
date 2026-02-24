@@ -4,12 +4,15 @@ import com.jackson.demo.entity.AppUser;
 import com.jackson.demo.entity.Cart;
 import com.jackson.demo.entity.Category;
 import com.jackson.demo.entity.Customer;
+import com.jackson.demo.entity.PaymentMethod;
 import com.jackson.demo.entity.Product;
+import com.jackson.demo.model.PaymentProvider;
 import com.jackson.demo.model.UserRole;
 import com.jackson.demo.repository.AppUserRepository;
 import com.jackson.demo.repository.CartRepository;
 import com.jackson.demo.repository.CategoryRepository;
 import com.jackson.demo.repository.CustomerRepository;
+import com.jackson.demo.repository.PaymentMethodRepository;
 import com.jackson.demo.repository.ProductRepository;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -32,6 +35,7 @@ public class DataSeeder {
             AppUserRepository appUserRepository,
             CustomerRepository customerRepository,
             CartRepository cartRepository,
+            PaymentMethodRepository paymentMethodRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
             Map<String, Category> categoriesByName = new HashMap<>();
@@ -146,6 +150,23 @@ public class DataSeeder {
                 shopper.getRoles().add(UserRole.ROLE_CUSTOMER);
                 shopper.setCustomer(customer);
                 return appUserRepository.save(shopper);
+            });
+
+            customerRepository.findByEmailIgnoreCase("customer@shop.local").ifPresent(customer -> {
+                if (paymentMethodRepository.countByCustomerId(customer.getId()) == 0) {
+                    PaymentMethod method = new PaymentMethod();
+                    method.setCustomer(customer);
+                    method.setProvider(PaymentProvider.CARD);
+                    method.setCardHolderName(customer.getFullName());
+                    method.setBrand("VISA");
+                    method.setLast4("4242");
+                    method.setExpiryMonth(12);
+                    method.setExpiryYear(2030);
+                    method.setBillingAddress(customer.getAddress());
+                    method.setDefaultMethod(true);
+                    method.setEnabled(true);
+                    paymentMethodRepository.save(method);
+                }
             });
         };
     }
