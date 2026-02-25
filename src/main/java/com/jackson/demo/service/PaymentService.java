@@ -147,9 +147,6 @@ public class PaymentService {
         transaction.setGatewayResponseCode("APPROVED");
         transaction.setGatewayMessage("Payment approved");
 
-        order.setStatus(OrderStatus.PAID);
-        customerOrderRepository.save(order);
-
         return toPaymentTransactionResponse(paymentTransactionRepository.save(transaction));
     }
 
@@ -185,11 +182,8 @@ public class PaymentService {
         if (order.getStatus() == OrderStatus.CANCELLED) {
             throw new BadRequestException("Cancelled orders cannot be paid");
         }
-        if (order.getStatus() == OrderStatus.PAID
-                || order.getStatus() == OrderStatus.PROCESSING
-                || order.getStatus() == OrderStatus.SHIPPED
-                || order.getStatus() == OrderStatus.DELIVERED) {
-            throw new BadRequestException("Order is already paid");
+        if (order.getStatus() != OrderStatus.ORDER_RECEIVED) {
+            throw new BadRequestException("Order payment is only allowed at ORDER_RECEIVED stage");
         }
     }
 

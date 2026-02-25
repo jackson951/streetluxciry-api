@@ -1,6 +1,7 @@
 package com.jackson.demo.controller;
 import java.util.UUID;
 
+import com.jackson.demo.dto.response.OrderTrackingResponse;
 import com.jackson.demo.dto.response.OrderResponse;
 import com.jackson.demo.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,5 +44,12 @@ public class OrderController {
     @GetMapping("/orders/{orderId}")
     public OrderResponse getOrder(@PathVariable UUID orderId) {
         return orderService.getOrder(orderId);
+    }
+
+    @Operation(summary = "Get order tracking stages")
+    @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessOrder(#orderId, authentication)")
+    @GetMapping("/orders/{orderId}/tracking")
+    public OrderTrackingResponse getOrderTracking(@PathVariable UUID orderId) {
+        return orderService.getOrderTracking(orderId);
     }
 }

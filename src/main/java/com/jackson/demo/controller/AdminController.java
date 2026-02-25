@@ -2,7 +2,9 @@ package com.jackson.demo.controller;
 import java.util.UUID;
 
 import com.jackson.demo.dto.request.AdminUserUpdateRequest;
+import com.jackson.demo.dto.request.UpdateOrderStatusRequest;
 import com.jackson.demo.dto.response.AdminUserResponse;
+import com.jackson.demo.dto.response.OrderTrackingResponse;
 import com.jackson.demo.dto.response.OrderResponse;
 import com.jackson.demo.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +35,20 @@ public class AdminController {
     @GetMapping("/orders")
     public List<OrderResponse> listAllOrders() {
         return adminService.listAllOrders();
+    }
+
+    @Operation(summary = "Update order status to the next tracking stage")
+    @PatchMapping("/orders/{orderId}/status")
+    public OrderResponse updateOrderStatus(
+            @PathVariable UUID orderId,
+            @Valid @RequestBody UpdateOrderStatusRequest request) {
+        return adminService.updateOrderStatus(orderId, request.status());
+    }
+
+    @Operation(summary = "Get order tracking stages")
+    @GetMapping("/orders/{orderId}/tracking")
+    public OrderTrackingResponse getOrderTracking(@PathVariable UUID orderId) {
+        return adminService.getOrderTracking(orderId);
     }
 
     @Operation(summary = "List all users")

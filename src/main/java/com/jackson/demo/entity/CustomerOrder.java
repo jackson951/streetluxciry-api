@@ -38,7 +38,7 @@ public class CustomerOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private OrderStatus status = OrderStatus.CREATED;
+    private OrderStatus status = OrderStatus.ORDER_RECEIVED;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;

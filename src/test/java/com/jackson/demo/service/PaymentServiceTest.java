@@ -98,7 +98,7 @@ class PaymentServiceTest {
         CustomerOrder order = new CustomerOrder();
         ReflectionTestUtils.setField(order, "id", orderId);
         order.setCustomer(knownCustomer);
-        order.setStatus(OrderStatus.CREATED);
+        order.setStatus(OrderStatus.ORDER_RECEIVED);
         order.setTotalAmount(new BigDecimal("199.99"));
 
         PaymentMethod method = new PaymentMethod();
@@ -111,13 +111,13 @@ class PaymentServiceTest {
 
         when(customerOrderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Optional.of(method));
-        when(customerOrderRepository.save(any(CustomerOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(paymentTransactionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var response = paymentService.processOrderPayment(orderId, new ProcessPaymentRequest(paymentMethodId, "123"));
 
         assertEquals(PaymentStatus.APPROVED, response.status());
-        assertEquals(OrderStatus.PAID, order.getStatus());
+        assertEquals(OrderStatus.ORDER_RECEIVED, order.getStatus());
+        verify(customerOrderRepository, never()).save(any(CustomerOrder.class));
     }
 
     @SuppressWarnings("null")
@@ -128,7 +128,7 @@ class PaymentServiceTest {
         CustomerOrder order = new CustomerOrder();
         ReflectionTestUtils.setField(order, "id", orderId);
         order.setCustomer(knownCustomer);
-        order.setStatus(OrderStatus.CREATED);
+        order.setStatus(OrderStatus.ORDER_RECEIVED);
         order.setTotalAmount(new BigDecimal("50.00"));
 
         PaymentMethod method = new PaymentMethod();
@@ -147,7 +147,7 @@ class PaymentServiceTest {
 
         assertEquals(PaymentStatus.DECLINED, response.status());
         assertEquals("INVALID_CVV", response.gatewayResponseCode());
-        assertEquals(OrderStatus.CREATED, order.getStatus());
+        assertEquals(OrderStatus.ORDER_RECEIVED, order.getStatus());
         verify(customerOrderRepository, never()).save(any(CustomerOrder.class));
     }
 }

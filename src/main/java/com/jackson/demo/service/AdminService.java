@@ -2,8 +2,10 @@ package com.jackson.demo.service;
 import java.util.UUID;
 
 import com.jackson.demo.dto.request.AdminUserUpdateRequest;
+import com.jackson.demo.dto.response.OrderTrackingResponse;
 import com.jackson.demo.dto.response.AdminUserResponse;
 import com.jackson.demo.dto.response.OrderResponse;
+import com.jackson.demo.model.OrderStatus;
 import com.jackson.demo.entity.AppUser;
 import com.jackson.demo.entity.Customer;
 import com.jackson.demo.exception.BadRequestException;
@@ -39,6 +41,16 @@ public class AdminService {
     @Transactional(readOnly = true)
     public List<OrderResponse> listAllOrders() {
         return orderService.listAllOrders();
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(UUID orderId, OrderStatus status) {
+        return orderService.updateOrderStatus(orderId, status);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderTrackingResponse getOrderTracking(UUID orderId) {
+        return orderService.getOrderTracking(orderId);
     }
 
     @Transactional(readOnly = true)
