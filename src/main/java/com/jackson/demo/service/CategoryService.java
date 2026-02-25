@@ -68,6 +68,7 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public Category findCategory(Long id) {
         return categoryRepository.findById(id)

@@ -105,10 +105,12 @@ public class PaymentService {
 
     @Transactional
     public PaymentTransactionResponse processOrderPayment(Long orderId, ProcessPaymentRequest request) {
+        @SuppressWarnings("null")
         CustomerOrder order = customerOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
         validateOrderIsPayable(order);
 
+        @SuppressWarnings("null")
         PaymentMethod method = paymentMethodRepository.findById(request.paymentMethodId())
                 .orElseThrow(() -> new ResourceNotFoundException("Payment method not found: " + request.paymentMethodId()));
 
@@ -150,6 +152,7 @@ public class PaymentService {
         return toPaymentTransactionResponse(paymentTransactionRepository.save(transaction));
     }
 
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public List<PaymentTransactionResponse> listOrderPayments(Long orderId) {
         customerOrderRepository.findById(orderId)

@@ -32,6 +32,7 @@ class CustomerServiceTest {
     @InjectMocks
     private CustomerService customerService;
 
+    @SuppressWarnings("null")
     @Test
     void createCustomerThrowsWhenEmailAlreadyExists() {
         CustomerRequest request = new CustomerRequest("John Doe", "john@shop.local", null, null);
@@ -41,6 +42,7 @@ class CustomerServiceTest {
         verify(customerRepository, never()).save(any(Customer.class));
     }
 
+    @SuppressWarnings("null")
     @Test
     void updateCustomerThrowsWhenEmailBelongsToAnotherCustomer() {
         Customer current = new Customer();
@@ -59,6 +61,7 @@ class CustomerServiceTest {
         verify(customerRepository, never()).save(any(Customer.class));
     }
 
+    @SuppressWarnings("null")
     @Test
     void updateCustomerAllowsSameOwnerEmailAndNormalizesEmail() {
         Customer current = new Customer();

@@ -47,7 +47,8 @@ class AuthServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
-    @Test
+    @SuppressWarnings("null")
+@Test
     void loginForAdminWithoutCustomerGeneratesTokenWithoutCustomerClaim() {
         AuthService authService = new AuthService(
                 appUserRepository,

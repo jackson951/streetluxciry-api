@@ -27,7 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Configuration
 public class DataSeeder {
 
-    @Bean
+    @SuppressWarnings("null")
+@Bean
     @Transactional
     ApplicationRunner seedData(
             CategoryRepository categoryRepository,

@@ -41,6 +41,7 @@ public class ProductService {
         return ApiMapper.toProductResponse(productRepository.save(product));
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = findProduct(id);
@@ -48,11 +49,13 @@ public class ProductService {
         return ApiMapper.toProductResponse(productRepository.save(product));
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public void deleteProduct(Long id) {
         productRepository.delete(findProduct(id));
     }
 
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public Product findProduct(Long id) {
         return productRepository.findById(id)

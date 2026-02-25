@@ -57,6 +57,7 @@ class PaymentServiceTest {
                 customerService, customerOrderRepository, paymentMethodRepository, paymentTransactionRepository);
     }
 
+    @SuppressWarnings("null")
     @Test
     void createPaymentMethodSetsLast4AndDefaultForFirstMethod() {
         when(paymentMethodRepository.countByCustomerId(7L)).thenReturn(0L);
@@ -85,6 +86,7 @@ class PaymentServiceTest {
         assertTrue(response.defaultMethod());
     }
 
+    @SuppressWarnings("null")
     @Test
     void processOrderPaymentApprovesAndMarksOrderPaid() {
         CustomerOrder order = new CustomerOrder();
@@ -112,6 +114,7 @@ class PaymentServiceTest {
         assertEquals(OrderStatus.PAID, order.getStatus());
     }
 
+    @SuppressWarnings("null")
     @Test
     void processOrderPaymentDeclinesWhenCvvInvalid() {
         CustomerOrder order = new CustomerOrder();

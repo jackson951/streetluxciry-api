@@ -71,6 +71,7 @@ public class CartService {
         return ApiMapper.toCartResponse(cart);
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public CartResponse removeItem(Long customerId, Long itemId) {
         Cart cart = getOrCreateCart(customerId);

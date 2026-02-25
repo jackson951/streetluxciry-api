@@ -32,6 +32,7 @@ public class AdminService {
         return appUserRepository.findAllByOrderByCreatedAtDesc().stream().map(this::toAdminUserResponse).toList();
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public AdminUserResponse setUserEnabled(Long userId, boolean enabled) {
         AppUser user = appUserRepository.findById(userId)

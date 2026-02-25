@@ -91,6 +91,7 @@ public class OrderService {
                 .toList();
     }
 
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public OrderResponse getOrder(Long orderId) {
         CustomerOrder order = customerOrderRepository.findById(orderId)

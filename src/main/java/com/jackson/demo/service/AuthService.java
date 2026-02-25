@@ -122,6 +122,7 @@ public class AuthService {
         return issueTokens(user);
     }
 
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public AuthUserResponse me(AuthenticatedUser principal) {
         if (principal == null) {

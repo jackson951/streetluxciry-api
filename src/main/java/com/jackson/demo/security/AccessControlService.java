@@ -29,6 +29,7 @@ public class AccessControlService {
         return false;
     }
 
+    @SuppressWarnings("null")
     public boolean canAccessOrder(Long orderId, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;

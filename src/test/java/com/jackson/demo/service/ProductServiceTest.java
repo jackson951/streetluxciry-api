@@ -41,6 +41,7 @@ class ProductServiceTest {
         productService = new ProductService(productRepository, fakeCategoryService);
     }
 
+    @SuppressWarnings("null")
     @Test
     void createProductTrimsImageUrlsAndDefaultsActive() {
         ProductRequest request = new ProductRequest(

@@ -51,6 +51,7 @@ public class CustomerService {
         return ApiMapper.toCustomerResponse(saved);
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public CustomerResponse updateCustomer(Long id, CustomerRequest request) {
         Customer customer = findCustomer(id);
@@ -64,11 +65,13 @@ public class CustomerService {
         return ApiMapper.toCustomerResponse(customerRepository.save(customer));
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public void deleteCustomer(Long id) {
         customerRepository.delete(findCustomer(id));
     }
 
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public Customer findCustomer(Long id) {
         return customerRepository.findById(id)
