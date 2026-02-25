@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,14 +43,16 @@ class PaymentServiceTest {
     private PaymentService paymentService;
     private CustomerService customerService;
     private Customer knownCustomer;
+    private UUID knownCustomerId;
 
     @BeforeEach
     void setUp() {
+        knownCustomerId = UUID.randomUUID();
         knownCustomer = new Customer();
-        ReflectionTestUtils.setField(knownCustomer, "id", 7L);
+        ReflectionTestUtils.setField(knownCustomer, "id", knownCustomerId);
         customerService = new CustomerService(null, null) {
             @Override
-            public Customer findCustomer(Long id) {
+            public Customer findCustomer(UUID id) {
                 return knownCustomer;
             }
         };
@@ -60,11 +63,12 @@ class PaymentServiceTest {
     @SuppressWarnings("null")
     @Test
     void createPaymentMethodSetsLast4AndDefaultForFirstMethod() {
-        when(paymentMethodRepository.countByCustomerId(7L)).thenReturn(0L);
-        when(paymentMethodRepository.findByCustomerIdAndDefaultMethodTrue(7L)).thenReturn(Optional.empty());
+        UUID paymentMethodId = UUID.randomUUID();
+        when(paymentMethodRepository.countByCustomerId(knownCustomerId)).thenReturn(0L);
+        when(paymentMethodRepository.findByCustomerIdAndDefaultMethodTrue(knownCustomerId)).thenReturn(Optional.empty());
         when(paymentMethodRepository.save(any(PaymentMethod.class))).thenAnswer(invocation -> {
             PaymentMethod saved = invocation.getArgument(0);
-            ReflectionTestUtils.setField(saved, "id", 55L);
+            ReflectionTestUtils.setField(saved, "id", paymentMethodId);
             return saved;
         });
 
@@ -78,9 +82,9 @@ class PaymentServiceTest {
                 "742 Evergreen Terrace",
                 null);
 
-        var response = paymentService.createPaymentMethod(7L, request);
+        var response = paymentService.createPaymentMethod(knownCustomerId, request);
 
-        assertEquals(55L, response.id());
+        assertEquals(paymentMethodId, response.id());
         assertEquals("VISA", response.brand());
         assertEquals("1234", response.last4());
         assertTrue(response.defaultMethod());
@@ -89,26 +93,28 @@ class PaymentServiceTest {
     @SuppressWarnings("null")
     @Test
     void processOrderPaymentApprovesAndMarksOrderPaid() {
+        UUID orderId = UUID.randomUUID();
+        UUID paymentMethodId = UUID.randomUUID();
         CustomerOrder order = new CustomerOrder();
-        ReflectionTestUtils.setField(order, "id", 10L);
+        ReflectionTestUtils.setField(order, "id", orderId);
         order.setCustomer(knownCustomer);
         order.setStatus(OrderStatus.CREATED);
         order.setTotalAmount(new BigDecimal("199.99"));
 
         PaymentMethod method = new PaymentMethod();
-        ReflectionTestUtils.setField(method, "id", 5L);
+        ReflectionTestUtils.setField(method, "id", paymentMethodId);
         method.setCustomer(knownCustomer);
         method.setEnabled(true);
         method.setExpiryMonth(12);
         method.setExpiryYear(YearMonth.now().plusYears(2).getYear());
         method.setLast4("4242");
 
-        when(customerOrderRepository.findById(10L)).thenReturn(Optional.of(order));
-        when(paymentMethodRepository.findById(5L)).thenReturn(Optional.of(method));
+        when(customerOrderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Optional.of(method));
         when(customerOrderRepository.save(any(CustomerOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(paymentTransactionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var response = paymentService.processOrderPayment(10L, new ProcessPaymentRequest(5L, "123"));
+        var response = paymentService.processOrderPayment(orderId, new ProcessPaymentRequest(paymentMethodId, "123"));
 
         assertEquals(PaymentStatus.APPROVED, response.status());
         assertEquals(OrderStatus.PAID, order.getStatus());
@@ -117,25 +123,27 @@ class PaymentServiceTest {
     @SuppressWarnings("null")
     @Test
     void processOrderPaymentDeclinesWhenCvvInvalid() {
+        UUID orderId = UUID.randomUUID();
+        UUID paymentMethodId = UUID.randomUUID();
         CustomerOrder order = new CustomerOrder();
-        ReflectionTestUtils.setField(order, "id", 10L);
+        ReflectionTestUtils.setField(order, "id", orderId);
         order.setCustomer(knownCustomer);
         order.setStatus(OrderStatus.CREATED);
         order.setTotalAmount(new BigDecimal("50.00"));
 
         PaymentMethod method = new PaymentMethod();
-        ReflectionTestUtils.setField(method, "id", 5L);
+        ReflectionTestUtils.setField(method, "id", paymentMethodId);
         method.setCustomer(knownCustomer);
         method.setEnabled(true);
         method.setExpiryMonth(12);
         method.setExpiryYear(YearMonth.now().plusYears(2).getYear());
         method.setLast4("4242");
 
-        when(customerOrderRepository.findById(10L)).thenReturn(Optional.of(order));
-        when(paymentMethodRepository.findById(5L)).thenReturn(Optional.of(method));
+        when(customerOrderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(paymentMethodRepository.findById(paymentMethodId)).thenReturn(Optional.of(method));
         when(paymentTransactionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var response = paymentService.processOrderPayment(10L, new ProcessPaymentRequest(5L, "12"));
+        var response = paymentService.processOrderPayment(orderId, new ProcessPaymentRequest(paymentMethodId, "12"));
 
         assertEquals(PaymentStatus.DECLINED, response.status());
         assertEquals("INVALID_CVV", response.gatewayResponseCode());

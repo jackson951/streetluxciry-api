@@ -15,6 +15,7 @@ import com.jackson.demo.repository.AppUserRepository;
 import com.jackson.demo.repository.CustomerRepository;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -37,16 +38,18 @@ class AdminServiceTest {
     @Test
     void updateUserUpdatesAllEditableFields() {
         AdminService adminService = new AdminService(null, appUserRepository, customerRepository, passwordEncoder);
+        UUID customerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
         Customer customer = new Customer();
-        ReflectionTestUtils.setField(customer, "id", 21L);
+        ReflectionTestUtils.setField(customer, "id", customerId);
         customer.setFullName("Old Name");
         customer.setEmail("old@shop.local");
         customer.setPhone("111");
         customer.setAddress("Old");
 
         AppUser user = new AppUser();
-        ReflectionTestUtils.setField(user, "id", 11L);
+        ReflectionTestUtils.setField(user, "id", userId);
         user.setEmail("old@shop.local");
         user.setFullName("Old Name");
         user.setPasswordHash("old-hash");
@@ -63,14 +66,14 @@ class AdminServiceTest {
                 "222",
                 "New Address");
 
-        when(appUserRepository.findById(11L)).thenReturn(Optional.of(user));
+        when(appUserRepository.findById(userId)).thenReturn(Optional.of(user));
         when(appUserRepository.findByEmailIgnoreCase("new@shop.local")).thenReturn(Optional.of(user));
         when(customerRepository.findByEmailIgnoreCase("new@shop.local")).thenReturn(Optional.of(customer));
         when(passwordEncoder.encode("NewPassword123")).thenReturn("new-hash");
         when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(appUserRepository.save(any(AppUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var response = adminService.updateUser(11L, request);
+        var response = adminService.updateUser(userId, request);
 
         assertEquals("new@shop.local", response.email());
         assertEquals("New Name", response.fullName());
@@ -87,9 +90,10 @@ class AdminServiceTest {
     @Test
     void updateUserRejectsRemovingAdminRoleFromDefaultAdmin() {
         AdminService adminService = new AdminService(null, appUserRepository, customerRepository, passwordEncoder);
+        UUID adminId = UUID.randomUUID();
 
         AppUser admin = new AppUser();
-        ReflectionTestUtils.setField(admin, "id", 1L);
+        ReflectionTestUtils.setField(admin, "id", adminId);
         admin.setEmail("admin@shop.local");
         admin.setFullName("Admin");
         admin.setPasswordHash("hash");
@@ -105,10 +109,10 @@ class AdminServiceTest {
                 null,
                 null);
 
-        when(appUserRepository.findById(1L)).thenReturn(Optional.of(admin));
+        when(appUserRepository.findById(adminId)).thenReturn(Optional.of(admin));
         when(appUserRepository.findByEmailIgnoreCase("admin@shop.local")).thenReturn(Optional.of(admin));
         when(customerRepository.findByEmailIgnoreCase("admin@shop.local")).thenReturn(Optional.empty());
 
-        assertThrows(BadRequestException.class, () -> adminService.updateUser(1L, request));
+        assertThrows(BadRequestException.class, () -> adminService.updateUser(adminId, request));
     }
 }

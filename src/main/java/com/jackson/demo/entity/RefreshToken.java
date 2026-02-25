@@ -1,4 +1,5 @@
 package com.jackson.demo.entity;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,8 +17,8 @@ import java.time.Instant;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 300)
     private String token;
@@ -32,7 +33,7 @@ public class RefreshToken {
     @Column(nullable = false)
     private boolean revoked = false;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

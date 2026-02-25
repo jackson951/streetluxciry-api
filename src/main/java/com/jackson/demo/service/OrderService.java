@@ -37,7 +37,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse checkout(Long customerId) {
+    public OrderResponse checkout(UUID customerId) {
         Cart cart = cartService.getOrCreateCart(customerId);
         if (cart.getItems().isEmpty()) {
             throw new BadRequestException("Cart is empty");
@@ -75,7 +75,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> listCustomerOrders(Long customerId) {
+    public List<OrderResponse> listCustomerOrders(UUID customerId) {
         customerService.findCustomer(customerId);
         return customerOrderRepository.findByCustomerIdOrderByCreatedAtDesc(customerId)
                 .stream()
@@ -93,7 +93,7 @@ public class OrderService {
 
     @SuppressWarnings("null")
     @Transactional(readOnly = true)
-    public OrderResponse getOrder(Long orderId) {
+    public OrderResponse getOrder(UUID orderId) {
         CustomerOrder order = customerOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
         return ApiMapper.toOrderResponse(order);

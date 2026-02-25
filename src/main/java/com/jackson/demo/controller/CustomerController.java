@@ -1,4 +1,5 @@
 package com.jackson.demo.controller;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.CustomerRequest;
 import com.jackson.demo.dto.response.CustomerResponse;
@@ -38,7 +39,7 @@ public class CustomerController {
     @Operation(summary = "Get customer by id")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#id, authentication)")
     @GetMapping("/{id}")
-    public CustomerResponse getCustomer(@PathVariable Long id) {
+    public CustomerResponse getCustomer(@PathVariable UUID id) {
         return customerService.getCustomer(id);
     }
 
@@ -52,14 +53,14 @@ public class CustomerController {
     @Operation(summary = "Update customer")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#id, authentication)")
     @PutMapping("/{id}")
-    public CustomerResponse updateCustomer(@PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
+    public CustomerResponse updateCustomer(@PathVariable UUID id, @Valid @RequestBody CustomerRequest request) {
         return customerService.updateCustomer(id, request);
     }
 
     @Operation(summary = "Delete customer")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable UUID id) {
         customerService.deleteCustomer(id);
         return ResponseEntity.noContent().build();
     }

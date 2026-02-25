@@ -1,4 +1,5 @@
 package com.jackson.demo.security;
+import java.util.UUID;
 
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
@@ -6,16 +7,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class AuthenticatedUser implements UserDetails {
 
-    private final Long userId;
-    private final Long customerId;
+    private final UUID userId;
+    private final UUID customerId;
     private final String username;
     private final String password;
     private final boolean enabled;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public AuthenticatedUser(
-            Long userId,
-            Long customerId,
+            UUID userId,
+            UUID customerId,
             String username,
             String password,
             boolean enabled,
@@ -28,11 +29,11 @@ public class AuthenticatedUser implements UserDetails {
         this.authorities = authorities;
     }
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public Long getCustomerId() {
+    public UUID getCustomerId() {
         return customerId;
     }
 

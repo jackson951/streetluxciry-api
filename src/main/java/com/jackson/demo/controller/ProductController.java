@@ -1,4 +1,5 @@
 package com.jackson.demo.controller;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.ProductRequest;
 import com.jackson.demo.dto.response.ProductResponse;
@@ -37,7 +38,7 @@ public class ProductController {
 
     @Operation(summary = "Get product by id")
     @GetMapping("/{id}")
-    public ProductResponse getProduct(@PathVariable Long id) {
+    public ProductResponse getProduct(@PathVariable UUID id) {
         return productService.getProduct(id);
     }
 
@@ -51,14 +52,14 @@ public class ProductController {
     @Operation(summary = "Update product")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ProductResponse updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
+    public ProductResponse updateProduct(@PathVariable UUID id, @Valid @RequestBody ProductRequest request) {
         return productService.updateProduct(id, request);
     }
 
     @Operation(summary = "Delete product")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

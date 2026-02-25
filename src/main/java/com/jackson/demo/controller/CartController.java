@@ -1,4 +1,5 @@
 package com.jackson.demo.controller;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.AddToCartRequest;
 import com.jackson.demo.dto.request.UpdateCartItemRequest;
@@ -30,14 +31,14 @@ public class CartController {
     @Operation(summary = "Get customer cart")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @GetMapping
-    public CartResponse getCart(@PathVariable Long customerId) {
+    public CartResponse getCart(@PathVariable UUID customerId) {
         return cartService.getCart(customerId);
     }
 
     @Operation(summary = "Add product to cart")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @PostMapping("/items")
-    public CartResponse addToCart(@PathVariable Long customerId, @Valid @RequestBody AddToCartRequest request) {
+    public CartResponse addToCart(@PathVariable UUID customerId, @Valid @RequestBody AddToCartRequest request) {
         return cartService.addItem(customerId, request);
     }
 
@@ -45,8 +46,8 @@ public class CartController {
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @PatchMapping("/items/{itemId}")
     public CartResponse updateCartItem(
-            @PathVariable Long customerId,
-            @PathVariable Long itemId,
+            @PathVariable UUID customerId,
+            @PathVariable UUID itemId,
             @Valid @RequestBody UpdateCartItemRequest request) {
         return cartService.updateItem(customerId, itemId, request);
     }
@@ -54,14 +55,14 @@ public class CartController {
     @Operation(summary = "Remove item from cart")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @DeleteMapping("/items/{itemId}")
-    public CartResponse removeItem(@PathVariable Long customerId, @PathVariable Long itemId) {
+    public CartResponse removeItem(@PathVariable UUID customerId, @PathVariable UUID itemId) {
         return cartService.removeItem(customerId, itemId);
     }
 
     @Operation(summary = "Clear entire cart")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @DeleteMapping
-    public ResponseEntity<Void> clearCart(@PathVariable Long customerId) {
+    public ResponseEntity<Void> clearCart(@PathVariable UUID customerId) {
         cartService.clearCart(customerId);
         return ResponseEntity.noContent().build();
     }

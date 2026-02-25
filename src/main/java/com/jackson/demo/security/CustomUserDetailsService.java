@@ -1,4 +1,5 @@
 package com.jackson.demo.security;
+import java.util.UUID;
 
 import com.jackson.demo.entity.AppUser;
 import com.jackson.demo.repository.AppUserRepository;
@@ -22,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         AppUser user = appUserRepository.findByEmailIgnoreCase(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        Long customerId = user.getCustomer() != null ? user.getCustomer().getId() : null;
+        UUID customerId = user.getCustomer() != null ? user.getCustomer().getId() : null;
         return new AuthenticatedUser(
                 user.getId(),
                 customerId,

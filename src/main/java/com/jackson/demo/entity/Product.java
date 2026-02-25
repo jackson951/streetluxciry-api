@@ -1,4 +1,5 @@
 package com.jackson.demo.entity;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.CollectionTable;
@@ -20,8 +21,8 @@ import java.util.List;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, length = 160)
     private String name;
@@ -47,7 +48,7 @@ public class Product {
     @Column(name = "image_url", nullable = false, length = 700)
     private List<String> imageUrls = new ArrayList<>();
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

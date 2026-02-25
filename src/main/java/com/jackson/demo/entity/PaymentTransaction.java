@@ -1,4 +1,5 @@
 package com.jackson.demo.entity;
+import java.util.UUID;
 
 import com.jackson.demo.model.PaymentStatus;
 import jakarta.persistence.Column;
@@ -21,8 +22,8 @@ import java.time.Instant;
 public class PaymentTransaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
@@ -60,7 +61,7 @@ public class PaymentTransaction {
         processedAt = Instant.now();
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

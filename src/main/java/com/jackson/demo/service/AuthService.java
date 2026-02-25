@@ -170,7 +170,7 @@ public class AuthService {
 
     private AuthUserResponse toUserResponse(AppUser user) {
         Set<String> roles = user.getRoles().stream().map(Enum::name).collect(Collectors.toSet());
-        Long customerId = user.getCustomer() != null ? user.getCustomer().getId() : null;
+        UUID customerId = user.getCustomer() != null ? user.getCustomer().getId() : null;
         return new AuthUserResponse(user.getId(), user.getEmail(), user.getFullName(), roles, customerId);
     }
 }

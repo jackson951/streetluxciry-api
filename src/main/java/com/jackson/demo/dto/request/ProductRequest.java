@@ -1,4 +1,5 @@
 package com.jackson.demo.dto.request;
+import java.util.UUID;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -13,7 +14,7 @@ public record ProductRequest(
         @Size(max = 1000) String description,
         @NotNull @DecimalMin("0.00") BigDecimal price,
         @NotNull @Min(0) Integer stockQuantity,
-        @NotNull Long categoryId,
+        @NotNull UUID categoryId,
         @NotNull @Size(min = 1, message = "At least one image URL is required") List<
                 @NotBlank @Size(max = 700) String> imageUrls,
         Boolean active) {

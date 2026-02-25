@@ -1,4 +1,5 @@
 package com.jackson.demo.entity;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,8 +13,8 @@ import jakarta.persistence.Table;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 120)
     private String name;
@@ -21,7 +22,7 @@ public class Category {
     @Column(length = 500)
     private String description;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

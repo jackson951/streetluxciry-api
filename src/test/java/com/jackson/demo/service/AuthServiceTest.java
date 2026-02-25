@@ -16,6 +16,7 @@ import com.jackson.demo.repository.CustomerRepository;
 import com.jackson.demo.repository.RefreshTokenRepository;
 import com.jackson.demo.security.JwtService;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -61,7 +62,7 @@ class AuthServiceTest {
                 14);
 
         AppUser admin = new AppUser();
-        ReflectionTestUtils.setField(admin, "id", 1L);
+        ReflectionTestUtils.setField(admin, "id", UUID.randomUUID());
         admin.setEmail("admin@shop.local");
         admin.setFullName("Admin");
         admin.setPasswordHash("hashed");

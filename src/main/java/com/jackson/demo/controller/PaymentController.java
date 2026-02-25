@@ -1,4 +1,5 @@
 package com.jackson.demo.controller;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.CreatePaymentMethodRequest;
 import com.jackson.demo.dto.request.ProcessPaymentRequest;
@@ -34,7 +35,7 @@ public class PaymentController {
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @PostMapping("/customers/{customerId}/payment-methods")
     public ResponseEntity<PaymentMethodResponse> createPaymentMethod(
-            @PathVariable Long customerId,
+            @PathVariable UUID customerId,
             @Valid @RequestBody CreatePaymentMethodRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.createPaymentMethod(customerId, request));
     }
@@ -42,7 +43,7 @@ public class PaymentController {
     @Operation(summary = "List customer payment methods")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @GetMapping("/customers/{customerId}/payment-methods")
-    public List<PaymentMethodResponse> listCustomerPaymentMethods(@PathVariable Long customerId) {
+    public List<PaymentMethodResponse> listCustomerPaymentMethods(@PathVariable UUID customerId) {
         return paymentService.listCustomerPaymentMethods(customerId);
     }
 
@@ -50,8 +51,8 @@ public class PaymentController {
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @PatchMapping("/customers/{customerId}/payment-methods/{paymentMethodId}/default")
     public PaymentMethodResponse setDefaultPaymentMethod(
-            @PathVariable Long customerId,
-            @PathVariable Long paymentMethodId) {
+            @PathVariable UUID customerId,
+            @PathVariable UUID paymentMethodId) {
         return paymentService.setDefaultPaymentMethod(customerId, paymentMethodId);
     }
 
@@ -59,8 +60,8 @@ public class PaymentController {
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @PatchMapping("/customers/{customerId}/payment-methods/{paymentMethodId}/access")
     public PaymentMethodResponse setPaymentMethodEnabled(
-            @PathVariable Long customerId,
-            @PathVariable Long paymentMethodId,
+            @PathVariable UUID customerId,
+            @PathVariable UUID paymentMethodId,
             @RequestParam boolean enabled) {
         return paymentService.setPaymentMethodEnabled(customerId, paymentMethodId, enabled);
     }
@@ -69,7 +70,7 @@ public class PaymentController {
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessOrder(#orderId, authentication)")
     @PostMapping("/orders/{orderId}/payments")
     public ResponseEntity<PaymentTransactionResponse> processPayment(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             @Valid @RequestBody ProcessPaymentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(paymentService.processOrderPayment(orderId, request));
     }
@@ -77,14 +78,14 @@ public class PaymentController {
     @Operation(summary = "List payment attempts for an order")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessOrder(#orderId, authentication)")
     @GetMapping("/orders/{orderId}/payments")
-    public List<PaymentTransactionResponse> listOrderPayments(@PathVariable Long orderId) {
+    public List<PaymentTransactionResponse> listOrderPayments(@PathVariable UUID orderId) {
         return paymentService.listOrderPayments(orderId);
     }
 
     @Operation(summary = "List all payments for a customer")
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.canAccessCustomer(#customerId, authentication)")
     @GetMapping("/customers/{customerId}/payments")
-    public List<PaymentTransactionResponse> listCustomerPayments(@PathVariable Long customerId) {
+    public List<PaymentTransactionResponse> listCustomerPayments(@PathVariable UUID customerId) {
         return paymentService.listCustomerPayments(customerId);
     }
 }

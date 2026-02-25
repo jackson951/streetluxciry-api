@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.CustomerRequest;
 import com.jackson.demo.dto.response.CustomerResponse;
@@ -30,7 +31,7 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public CustomerResponse getCustomer(Long id) {
+    public CustomerResponse getCustomer(UUID id) {
         return ApiMapper.toCustomerResponse(findCustomer(id));
     }
 
@@ -53,7 +54,7 @@ public class CustomerService {
 
     @SuppressWarnings("null")
     @Transactional
-    public CustomerResponse updateCustomer(Long id, CustomerRequest request) {
+    public CustomerResponse updateCustomer(UUID id, CustomerRequest request) {
         Customer customer = findCustomer(id);
         String normalizedEmail = request.email().trim().toLowerCase();
         customerRepository.findByEmailIgnoreCase(normalizedEmail).ifPresent(existing -> {
@@ -67,13 +68,13 @@ public class CustomerService {
 
     @SuppressWarnings("null")
     @Transactional
-    public void deleteCustomer(Long id) {
+    public void deleteCustomer(UUID id) {
         customerRepository.delete(findCustomer(id));
     }
 
     @SuppressWarnings("null")
     @Transactional(readOnly = true)
-    public Customer findCustomer(Long id) {
+    public Customer findCustomer(UUID id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
     }

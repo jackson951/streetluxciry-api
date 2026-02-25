@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.CategoryRequest;
 import com.jackson.demo.dto.response.CategoryResponse;
@@ -29,7 +30,7 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public CategoryResponse getCategory(Long id) {
+    public CategoryResponse getCategory(UUID id) {
         return ApiMapper.toCategoryResponse(findCategory(id));
     }
 
@@ -46,7 +47,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
+    public CategoryResponse updateCategory(UUID id, CategoryRequest request) {
         Category category = findCategory(id);
         categoryRepository.findByNameIgnoreCase(request.name().trim()).ifPresent(existing -> {
             if (!existing.getId().equals(category.getId())) {
@@ -59,7 +60,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public void deleteCategory(Long id) {
+    public void deleteCategory(UUID id) {
         Category category = findCategory(id);
         long productCount = productRepository.countByCategoryId(category.getId());
         if (productCount > 0) {
@@ -70,7 +71,7 @@ public class CategoryService {
 
     @SuppressWarnings("null")
     @Transactional(readOnly = true)
-    public Category findCategory(Long id) {
+    public Category findCategory(UUID id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + id));
     }

@@ -9,6 +9,7 @@ import com.jackson.demo.entity.CustomerOrder;
 import com.jackson.demo.repository.CustomerOrderRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,43 +28,49 @@ class AccessControlServiceTest {
     @Test
     void canAccessCustomerReturnsTrueForAdmin() {
         AccessControlService service = new AccessControlService(customerOrderRepository);
+        UUID customerId = UUID.randomUUID();
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 "admin",
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
-        assertTrue(service.canAccessCustomer(99L, auth));
+        assertTrue(service.canAccessCustomer(customerId, auth));
     }
 
     @Test
     void canAccessCustomerReturnsTrueForOwnerAndFalseForOther() {
         AccessControlService service = new AccessControlService(customerOrderRepository);
+        UUID userId = UUID.randomUUID();
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID otherCustomerId = UUID.randomUUID();
         AuthenticatedUser principal = new AuthenticatedUser(
-                10L,
-                7L,
+                userId,
+                ownerCustomerId,
                 "user@shop.local",
                 "x",
                 true,
                 List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
         Authentication auth = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
 
-        assertTrue(service.canAccessCustomer(7L, auth));
-        assertFalse(service.canAccessCustomer(8L, auth));
+        assertTrue(service.canAccessCustomer(ownerCustomerId, auth));
+        assertFalse(service.canAccessCustomer(otherCustomerId, auth));
     }
 
     @Test
     void canAccessOrderReturnsTrueOnlyForOwnerOrAdmin() {
         AccessControlService service = new AccessControlService(customerOrderRepository);
+        UUID ownerCustomerId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
 
         Customer owner = new Customer();
-        ReflectionTestUtils.setField(owner, "id", 7L);
+        ReflectionTestUtils.setField(owner, "id", ownerCustomerId);
         CustomerOrder order = new CustomerOrder();
         order.setCustomer(owner);
-        when(customerOrderRepository.findById(15L)).thenReturn(Optional.of(order));
+        when(customerOrderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
         AuthenticatedUser ownerPrincipal = new AuthenticatedUser(
-                10L,
-                7L,
+                UUID.randomUUID(),
+                ownerCustomerId,
                 "owner@shop.local",
                 "x",
                 true,
@@ -72,8 +79,8 @@ class AccessControlServiceTest {
                 new UsernamePasswordAuthenticationToken(ownerPrincipal, null, ownerPrincipal.getAuthorities());
 
         AuthenticatedUser otherPrincipal = new AuthenticatedUser(
-                11L,
-                8L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
                 "other@shop.local",
                 "x",
                 true,
@@ -86,8 +93,8 @@ class AccessControlServiceTest {
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
-        assertTrue(service.canAccessOrder(15L, ownerAuth));
-        assertFalse(service.canAccessOrder(15L, otherAuth));
-        assertTrue(service.canAccessOrder(15L, adminAuth));
+        assertTrue(service.canAccessOrder(orderId, ownerAuth));
+        assertFalse(service.canAccessOrder(orderId, otherAuth));
+        assertTrue(service.canAccessOrder(orderId, adminAuth));
     }
 }

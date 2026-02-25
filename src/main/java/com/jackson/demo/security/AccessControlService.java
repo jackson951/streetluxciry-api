@@ -1,4 +1,5 @@
 package com.jackson.demo.security;
+import java.util.UUID;
 
 import com.jackson.demo.entity.CustomerOrder;
 import com.jackson.demo.repository.CustomerOrderRepository;
@@ -15,7 +16,7 @@ public class AccessControlService {
         this.customerOrderRepository = customerOrderRepository;
     }
 
-    public boolean canAccessCustomer(Long customerId, Authentication authentication) {
+    public boolean canAccessCustomer(UUID customerId, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
@@ -30,7 +31,7 @@ public class AccessControlService {
     }
 
     @SuppressWarnings("null")
-    public boolean canAccessOrder(Long orderId, Authentication authentication) {
+    public boolean canAccessOrder(UUID orderId, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }

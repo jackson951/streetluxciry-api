@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.AddToCartRequest;
 import com.jackson.demo.dto.request.UpdateCartItemRequest;
@@ -34,12 +35,12 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public CartResponse getCart(Long customerId) {
+    public CartResponse getCart(UUID customerId) {
         return ApiMapper.toCartResponse(getOrCreateCart(customerId));
     }
 
     @Transactional
-    public CartResponse addItem(Long customerId, AddToCartRequest request) {
+    public CartResponse addItem(UUID customerId, AddToCartRequest request) {
         Cart cart = getOrCreateCart(customerId);
         Product product = productService.findProduct(request.productId());
         if (!product.isActive()) {
@@ -62,7 +63,7 @@ public class CartService {
     }
 
     @Transactional
-    public CartResponse updateItem(Long customerId, Long itemId, UpdateCartItemRequest request) {
+    public CartResponse updateItem(UUID customerId, UUID itemId, UpdateCartItemRequest request) {
         Cart cart = getOrCreateCart(customerId);
         CartItem item = cartItemRepository.findByIdAndCartId(itemId, cart.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + itemId));
@@ -73,7 +74,7 @@ public class CartService {
 
     @SuppressWarnings("null")
     @Transactional
-    public CartResponse removeItem(Long customerId, Long itemId) {
+    public CartResponse removeItem(UUID customerId, UUID itemId) {
         Cart cart = getOrCreateCart(customerId);
         CartItem item = cartItemRepository.findByIdAndCartId(itemId, cart.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + itemId));
@@ -82,14 +83,14 @@ public class CartService {
     }
 
     @Transactional
-    public void clearCart(Long customerId) {
+    public void clearCart(UUID customerId) {
         Cart cart = getOrCreateCart(customerId);
         cart.getItems().clear();
         cartRepository.save(cart);
     }
 
     @Transactional(readOnly = true)
-    public Cart getOrCreateCart(Long customerId) {
+    public Cart getOrCreateCart(UUID customerId) {
         customerService.findCustomer(customerId);
         return cartRepository.findByCustomerId(customerId).orElseGet(() -> {
             Cart cart = new Cart();

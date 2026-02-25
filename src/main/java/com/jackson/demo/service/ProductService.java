@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.ProductRequest;
 import com.jackson.demo.dto.response.ProductResponse;
@@ -35,7 +36,7 @@ public class ProductService {
 
     @Cacheable(cacheNames = "productById", key = "#id")
     @Transactional(readOnly = true)
-    public ProductResponse getProduct(Long id) {
+    public ProductResponse getProduct(UUID id) {
         return ApiMapper.toProductResponse(findProduct(id));
     }
 
@@ -53,7 +54,7 @@ public class ProductService {
         @CacheEvict(cacheNames = "productLists", allEntries = true)
     })
     @Transactional
-    public ProductResponse updateProduct(Long id, ProductRequest request) {
+    public ProductResponse updateProduct(UUID id, ProductRequest request) {
         Product product = findProduct(id);
         applyRequest(product, request);
         return ApiMapper.toProductResponse(productRepository.save(product));
@@ -64,13 +65,13 @@ public class ProductService {
         @CacheEvict(cacheNames = "productLists", allEntries = true)
     })
     @Transactional
-    public void deleteProduct(Long id) {
+    public void deleteProduct(UUID id) {
         productRepository.delete(findProduct(id));
     }
 
     @SuppressWarnings("null")
     @Transactional(readOnly = true)
-    public Product findProduct(Long id) {
+    public Product findProduct(UUID id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
     }

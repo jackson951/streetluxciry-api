@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.CreatePaymentMethodRequest;
 import com.jackson.demo.dto.request.ProcessPaymentRequest;
@@ -42,7 +43,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentMethodResponse createPaymentMethod(Long customerId, CreatePaymentMethodRequest request) {
+    public PaymentMethodResponse createPaymentMethod(UUID customerId, CreatePaymentMethodRequest request) {
         Customer customer = customerService.findCustomer(customerId);
         String normalizedCardNumber = normalizeCardNumber(request.cardNumber());
         validateExpiry(request.expiryMonth(), request.expiryYear());
@@ -69,7 +70,7 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public List<PaymentMethodResponse> listCustomerPaymentMethods(Long customerId) {
+    public List<PaymentMethodResponse> listCustomerPaymentMethods(UUID customerId) {
         customerService.findCustomer(customerId);
         return paymentMethodRepository.findByCustomerIdOrderByCreatedAtDesc(customerId).stream()
                 .map(this::toPaymentMethodResponse)
@@ -77,7 +78,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentMethodResponse setDefaultPaymentMethod(Long customerId, Long paymentMethodId) {
+    public PaymentMethodResponse setDefaultPaymentMethod(UUID customerId, UUID paymentMethodId) {
         customerService.findCustomer(customerId);
         PaymentMethod method = findPaymentMethod(customerId, paymentMethodId);
         if (!method.isEnabled()) {
@@ -89,7 +90,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentMethodResponse setPaymentMethodEnabled(Long customerId, Long paymentMethodId, boolean enabled) {
+    public PaymentMethodResponse setPaymentMethodEnabled(UUID customerId, UUID paymentMethodId, boolean enabled) {
         customerService.findCustomer(customerId);
         PaymentMethod method = findPaymentMethod(customerId, paymentMethodId);
         method.setEnabled(enabled);
@@ -104,7 +105,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentTransactionResponse processOrderPayment(Long orderId, ProcessPaymentRequest request) {
+    public PaymentTransactionResponse processOrderPayment(UUID orderId, ProcessPaymentRequest request) {
         @SuppressWarnings("null")
         CustomerOrder order = customerOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
@@ -154,7 +155,7 @@ public class PaymentService {
 
     @SuppressWarnings("null")
     @Transactional(readOnly = true)
-    public List<PaymentTransactionResponse> listOrderPayments(Long orderId) {
+    public List<PaymentTransactionResponse> listOrderPayments(UUID orderId) {
         customerOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
         return paymentTransactionRepository.findByOrderIdOrderByProcessedAtDesc(orderId).stream()
@@ -163,19 +164,19 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public List<PaymentTransactionResponse> listCustomerPayments(Long customerId) {
+    public List<PaymentTransactionResponse> listCustomerPayments(UUID customerId) {
         customerService.findCustomer(customerId);
         return paymentTransactionRepository.findByCustomerIdOrderByProcessedAtDesc(customerId).stream()
                 .map(this::toPaymentTransactionResponse)
                 .toList();
     }
 
-    private PaymentMethod findPaymentMethod(Long customerId, Long paymentMethodId) {
+    private PaymentMethod findPaymentMethod(UUID customerId, UUID paymentMethodId) {
         return paymentMethodRepository.findByIdAndCustomerId(paymentMethodId, customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment method not found: " + paymentMethodId));
     }
 
-    private void clearDefaultMethod(Long customerId) {
+    private void clearDefaultMethod(UUID customerId) {
         paymentMethodRepository.findByCustomerIdAndDefaultMethodTrue(customerId)
                 .ifPresent(existing -> existing.setDefaultMethod(false));
     }

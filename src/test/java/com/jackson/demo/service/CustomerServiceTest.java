@@ -13,6 +13,7 @@ import com.jackson.demo.exception.BadRequestException;
 import com.jackson.demo.repository.CartRepository;
 import com.jackson.demo.repository.CustomerRepository;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,35 +46,38 @@ class CustomerServiceTest {
     @SuppressWarnings("null")
     @Test
     void updateCustomerThrowsWhenEmailBelongsToAnotherCustomer() {
+        UUID currentId = UUID.randomUUID();
+        UUID otherId = UUID.randomUUID();
         Customer current = new Customer();
-        ReflectionTestUtils.setField(current, "id", 1L);
+        ReflectionTestUtils.setField(current, "id", currentId);
         current.setEmail("current@shop.local");
 
         Customer other = new Customer();
-        ReflectionTestUtils.setField(other, "id", 2L);
+        ReflectionTestUtils.setField(other, "id", otherId);
         other.setEmail("existing@shop.local");
 
         CustomerRequest request = new CustomerRequest("Current", "existing@shop.local", "123", "Addr");
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(current));
+        when(customerRepository.findById(currentId)).thenReturn(Optional.of(current));
         when(customerRepository.findByEmailIgnoreCase("existing@shop.local")).thenReturn(Optional.of(other));
 
-        assertThrows(BadRequestException.class, () -> customerService.updateCustomer(1L, request));
+        assertThrows(BadRequestException.class, () -> customerService.updateCustomer(currentId, request));
         verify(customerRepository, never()).save(any(Customer.class));
     }
 
     @SuppressWarnings("null")
     @Test
     void updateCustomerAllowsSameOwnerEmailAndNormalizesEmail() {
+        UUID currentId = UUID.randomUUID();
         Customer current = new Customer();
-        ReflectionTestUtils.setField(current, "id", 1L);
+        ReflectionTestUtils.setField(current, "id", currentId);
         current.setEmail("same@shop.local");
 
         CustomerRequest request = new CustomerRequest("Jane Doe", " SAME@SHOP.LOCAL ", "555", "Earth");
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(current));
+        when(customerRepository.findById(currentId)).thenReturn(Optional.of(current));
         when(customerRepository.findByEmailIgnoreCase("same@shop.local")).thenReturn(Optional.of(current));
         when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var response = customerService.updateCustomer(1L, request);
+        var response = customerService.updateCustomer(currentId, request);
 
         assertEquals("same@shop.local", response.email());
         assertEquals("Jane Doe", response.fullName());

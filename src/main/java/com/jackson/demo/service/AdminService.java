@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.AdminUserUpdateRequest;
 import com.jackson.demo.dto.response.AdminUserResponse;
@@ -47,7 +48,7 @@ public class AdminService {
 
     @SuppressWarnings("null")
     @Transactional
-    public AdminUserResponse setUserEnabled(Long userId, boolean enabled) {
+    public AdminUserResponse setUserEnabled(UUID userId, boolean enabled) {
         AppUser user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         if (user.getEmail().equalsIgnoreCase("admin@shop.local") && !enabled) {
@@ -59,7 +60,7 @@ public class AdminService {
 
     @SuppressWarnings("null")
     @Transactional
-    public AdminUserResponse updateUser(Long userId, AdminUserUpdateRequest request) {
+    public AdminUserResponse updateUser(UUID userId, AdminUserUpdateRequest request) {
         AppUser user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
@@ -105,7 +106,7 @@ public class AdminService {
     }
 
     private AdminUserResponse toAdminUserResponse(AppUser user) {
-        Long customerId = user.getCustomer() != null ? user.getCustomer().getId() : null;
+        UUID customerId = user.getCustomer() != null ? user.getCustomer().getId() : null;
         return new AdminUserResponse(
                 user.getId(),
                 user.getEmail(),

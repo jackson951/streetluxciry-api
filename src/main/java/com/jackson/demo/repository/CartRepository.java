@@ -1,9 +1,10 @@
 package com.jackson.demo.repository;
+import java.util.UUID;
 
 import com.jackson.demo.entity.Cart;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CartRepository extends JpaRepository<Cart, Long> {
-    Optional<Cart> findByCustomerId(Long customerId);
+public interface CartRepository extends JpaRepository<Cart, UUID> {
+    Optional<Cart> findByCustomerId(UUID customerId);
 }

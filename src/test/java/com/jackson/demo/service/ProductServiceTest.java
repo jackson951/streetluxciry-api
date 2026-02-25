@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,7 +35,7 @@ class ProductServiceTest {
         category.setName("Electronics");
         CategoryService fakeCategoryService = new CategoryService(null, null) {
             @Override
-            public Category findCategory(Long id) {
+            public Category findCategory(UUID id) {
                 return category;
             }
         };
@@ -49,7 +50,7 @@ class ProductServiceTest {
                 "4k",
                 new BigDecimal("499.99"),
                 8,
-                1L,
+                UUID.randomUUID(),
                 List.of(" https://img.one.jpg ", "https://img.two.jpg "),
                 null);
 

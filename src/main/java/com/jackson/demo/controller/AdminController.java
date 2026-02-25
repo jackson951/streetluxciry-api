@@ -1,4 +1,5 @@
 package com.jackson.demo.controller;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.AdminUserUpdateRequest;
 import com.jackson.demo.dto.response.AdminUserResponse;
@@ -42,13 +43,13 @@ public class AdminController {
 
     @Operation(summary = "Enable or disable user access")
     @PatchMapping("/users/{userId}/access")
-    public AdminUserResponse setUserAccess(@PathVariable Long userId, @RequestParam boolean enabled) {
+    public AdminUserResponse setUserAccess(@PathVariable UUID userId, @RequestParam boolean enabled) {
         return adminService.setUserEnabled(userId, enabled);
     }
 
     @Operation(summary = "Update user details")
     @PutMapping("/users/{userId}")
-    public AdminUserResponse updateUser(@PathVariable Long userId, @Valid @RequestBody AdminUserUpdateRequest request) {
+    public AdminUserResponse updateUser(@PathVariable UUID userId, @Valid @RequestBody AdminUserUpdateRequest request) {
         return adminService.updateUser(userId, request);
     }
 }

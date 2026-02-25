@@ -1,4 +1,5 @@
 package com.jackson.demo.entity;
+import java.util.UUID;
 
 import com.jackson.demo.model.OrderStatus;
 import jakarta.persistence.CascadeType;
@@ -25,8 +26,8 @@ import java.util.List;
 public class CustomerOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 40)
     private String orderNumber;
@@ -53,7 +54,7 @@ public class CustomerOrder {
         createdAt = Instant.now();
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

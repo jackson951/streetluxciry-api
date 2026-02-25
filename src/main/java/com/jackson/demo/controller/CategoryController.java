@@ -1,4 +1,5 @@
 package com.jackson.demo.controller;
+import java.util.UUID;
 
 import com.jackson.demo.dto.request.CategoryRequest;
 import com.jackson.demo.dto.response.CategoryResponse;
@@ -36,7 +37,7 @@ public class CategoryController {
 
     @Operation(summary = "Get category by id")
     @GetMapping("/{id}")
-    public CategoryResponse getCategory(@PathVariable Long id) {
+    public CategoryResponse getCategory(@PathVariable UUID id) {
         return categoryService.getCategory(id);
     }
 
@@ -50,14 +51,14 @@ public class CategoryController {
     @Operation(summary = "Update category")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public CategoryResponse updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
+    public CategoryResponse updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryRequest request) {
         return categoryService.updateCategory(id, request);
     }
 
     @Operation(summary = "Delete category")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }

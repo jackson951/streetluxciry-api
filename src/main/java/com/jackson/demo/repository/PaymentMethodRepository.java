@@ -1,13 +1,14 @@
 package com.jackson.demo.repository;
+import java.util.UUID;
 
 import com.jackson.demo.entity.PaymentMethod;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
-    List<PaymentMethod> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
-    Optional<PaymentMethod> findByIdAndCustomerId(Long id, Long customerId);
-    long countByCustomerId(Long customerId);
-    Optional<PaymentMethod> findByCustomerIdAndDefaultMethodTrue(Long customerId);
+public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, UUID> {
+    List<PaymentMethod> findByCustomerIdOrderByCreatedAtDesc(UUID customerId);
+    Optional<PaymentMethod> findByIdAndCustomerId(UUID id, UUID customerId);
+    long countByCustomerId(UUID customerId);
+    Optional<PaymentMethod> findByCustomerIdAndDefaultMethodTrue(UUID customerId);
 }

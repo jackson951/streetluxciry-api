@@ -1,4 +1,5 @@
 package com.jackson.demo.entity;
+import java.util.UUID;
 
 import com.jackson.demo.model.UserRole;
 import jakarta.persistence.CollectionTable;
@@ -23,8 +24,8 @@ import java.util.Set;
 public class AppUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 190)
     private String email;
@@ -51,7 +52,7 @@ public class AppUser {
     @JoinColumn(name = "customer_id", unique = true)
     private Customer customer;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
