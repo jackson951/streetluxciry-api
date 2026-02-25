@@ -7,6 +7,9 @@ import com.jackson.demo.exception.ResourceNotFoundException;
 import com.jackson.demo.mapper.ApiMapper;
 import com.jackson.demo.repository.ProductRepository;
 import java.util.List;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ public class ProductService {
         this.categoryService = categoryService;
     }
 
+    @Cacheable(cacheNames = "productLists", key = "#q == null ? '' : #q.trim().toLowerCase()")
     @Transactional(readOnly = true)
     public List<ProductResponse> listProducts(String q) {
         List<Product> products = (q == null || q.isBlank())
@@ -29,11 +33,13 @@ public class ProductService {
         return products.stream().map(ApiMapper::toProductResponse).toList();
     }
 
+    @Cacheable(cacheNames = "productById", key = "#id")
     @Transactional(readOnly = true)
     public ProductResponse getProduct(Long id) {
         return ApiMapper.toProductResponse(findProduct(id));
     }
 
+    @CacheEvict(cacheNames = "productLists", allEntries = true)
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
         Product product = new Product();
@@ -42,6 +48,10 @@ public class ProductService {
     }
 
     @SuppressWarnings("null")
+    @Caching(evict = {
+        @CacheEvict(cacheNames = "productById", key = "#id"),
+        @CacheEvict(cacheNames = "productLists", allEntries = true)
+    })
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = findProduct(id);
@@ -49,7 +59,10 @@ public class ProductService {
         return ApiMapper.toProductResponse(productRepository.save(product));
     }
 
-    @SuppressWarnings("null")
+    @Caching(evict = {
+        @CacheEvict(cacheNames = "productById", key = "#id"),
+        @CacheEvict(cacheNames = "productLists", allEntries = true)
+    })
     @Transactional
     public void deleteProduct(Long id) {
         productRepository.delete(findProduct(id));
