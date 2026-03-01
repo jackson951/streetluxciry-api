@@ -1,4 +1,5 @@
 package com.jackson.demo.service;
+
 import java.util.UUID;
 
 import com.jackson.demo.dto.request.AddToCartRequest;
@@ -12,6 +13,7 @@ import com.jackson.demo.exception.ResourceNotFoundException;
 import com.jackson.demo.mapper.ApiMapper;
 import com.jackson.demo.repository.CartItemRepository;
 import com.jackson.demo.repository.CartRepository;
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,16 +24,19 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final CustomerService customerService;
     private final ProductService productService;
+    private final EntityManager entityManager;
 
     public CartService(
             CartRepository cartRepository,
             CartItemRepository cartItemRepository,
             CustomerService customerService,
-            ProductService productService) {
+            ProductService productService,
+            EntityManager entityManager) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.customerService = customerService;
         this.productService = productService;
+        this.entityManager = entityManager;
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +64,11 @@ public class CartService {
         }
         item.setUnitPrice(product.getPrice());
         cartItemRepository.save(item);
+
+        // Flush and refresh so the returned cart reflects DB state
+        entityManager.flush();
+        entityManager.refresh(cart);
+
         return ApiMapper.toCartResponse(cart);
     }
 
@@ -69,16 +79,30 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + itemId));
         item.setQuantity(request.quantity());
         cartItemRepository.save(item);
+
+        entityManager.flush();
+        entityManager.refresh(cart);
+
         return ApiMapper.toCartResponse(cart);
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public CartResponse removeItem(UUID customerId, UUID itemId) {
         Cart cart = getOrCreateCart(customerId);
         CartItem item = cartItemRepository.findByIdAndCartId(itemId, cart.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + itemId));
+
+        // Remove from the parent collection so JPA orphan removal + cascade are consistent,
+        // then also explicitly delete to guarantee the row is gone immediately.
+        cart.getItems().remove(item);
         cartItemRepository.delete(item);
+
+        // Flush writes to DB, refresh pulls the clean state back into the entity.
+        // Without this, ApiMapper.toCartResponse(cart) sees the stale in-memory
+        // collection and returns the item as if it was never removed.
+        entityManager.flush();
+        entityManager.refresh(cart);
+
         return ApiMapper.toCartResponse(cart);
     }
 
@@ -93,9 +117,9 @@ public class CartService {
     public Cart getOrCreateCart(UUID customerId) {
         customerService.findCustomer(customerId);
         return cartRepository.findByCustomerId(customerId).orElseGet(() -> {
-            Cart cart = new Cart();
-            cart.setCustomer(customerService.findCustomer(customerId));
-            return cartRepository.save(cart);
+            Cart newCart = new Cart();
+            newCart.setCustomer(customerService.findCustomer(customerId));
+            return cartRepository.save(newCart);
         });
     }
 }
