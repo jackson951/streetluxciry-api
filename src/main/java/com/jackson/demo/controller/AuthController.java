@@ -2,9 +2,13 @@ package com.jackson.demo.controller;
 
 import com.jackson.demo.dto.request.AuthLoginRequest;
 import com.jackson.demo.dto.request.AuthRegisterRequest;
+import com.jackson.demo.dto.request.ForgotPasswordRequest;
 import com.jackson.demo.dto.request.RefreshTokenRequest;
+import com.jackson.demo.dto.request.ResetPasswordRequest;
+import com.jackson.demo.dto.request.VerifyOtpRequest;
 import com.jackson.demo.dto.response.AuthTokenResponse;
 import com.jackson.demo.dto.response.AuthUserResponse;
+import com.jackson.demo.dto.response.OtpResponse;
 import com.jackson.demo.security.AuthenticatedUser;
 import com.jackson.demo.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +35,24 @@ public class AuthController {
     @PostMapping("/register")
     public AuthTokenResponse register(@Valid @RequestBody AuthRegisterRequest request) {
         return authService.register(request);
+    }
+
+    @Operation(summary = "Forgot password - generate OTP")
+    @PostMapping("/forgot-password")
+    public OtpResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return authService.forgotPassword(request);
+    }
+
+    @Operation(summary = "Reset password with OTP")
+    @PostMapping("/reset-password")
+    public void resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+    }
+
+    @Operation(summary = "Verify OTP")
+    @PostMapping("/verify-otp")
+    public OtpResponse verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        return authService.verifyOtp(request);
     }
 
     @Operation(summary = "Login with email and password")

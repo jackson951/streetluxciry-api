@@ -2,22 +2,30 @@ package com.jackson.demo.service;
 
 import com.jackson.demo.dto.request.AuthLoginRequest;
 import com.jackson.demo.dto.request.AuthRegisterRequest;
+import com.jackson.demo.dto.request.ForgotPasswordRequest;
 import com.jackson.demo.dto.request.RefreshTokenRequest;
+import com.jackson.demo.dto.request.ResetPasswordRequest;
+import com.jackson.demo.dto.request.VerifyOtpRequest;
 import com.jackson.demo.dto.response.AuthTokenResponse;
 import com.jackson.demo.dto.response.AuthUserResponse;
+import com.jackson.demo.dto.response.OtpResponse;
 import com.jackson.demo.entity.AppUser;
 import com.jackson.demo.entity.Cart;
 import com.jackson.demo.entity.Customer;
+import com.jackson.demo.entity.Otp;
 import com.jackson.demo.entity.RefreshToken;
 import com.jackson.demo.exception.BadRequestException;
 import com.jackson.demo.exception.ResourceNotFoundException;
+import com.jackson.demo.model.OtpType;
 import com.jackson.demo.model.UserRole;
 import com.jackson.demo.repository.AppUserRepository;
 import com.jackson.demo.repository.CartRepository;
 import com.jackson.demo.repository.CustomerRepository;
+import com.jackson.demo.repository.OtpRepository;
 import com.jackson.demo.repository.RefreshTokenRepository;
 import com.jackson.demo.security.AuthenticatedUser;
 import com.jackson.demo.security.JwtService;
+import com.jackson.demo.service.EmailService;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,30 +46,40 @@ public class AuthService {
     private final AppUserRepository appUserRepository;
     private final CustomerRepository customerRepository;
     private final CartRepository cartRepository;
+    private final OtpRepository otpRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final long refreshTokenExpirationDays;
+    private final EmailService emailService;
 
     public AuthService(
             AppUserRepository appUserRepository,
             CustomerRepository customerRepository,
             CartRepository cartRepository,
+            OtpRepository otpRepository,
             RefreshTokenRepository refreshTokenRepository,
             PasswordEncoder passwordEncoder,
             AuthenticationManager authenticationManager,
             JwtService jwtService,
-            @Value("${app.jwt.refresh-token-expiration-days}") long refreshTokenExpirationDays) {
+            EmailService emailService,
+            @Value("${app.jwt.refresh-token-expiration-days}") long refreshTokenExpirationDays,
+            @Value("${app.otp.expiration-minutes:10}") long otpExpirationMinutes) {
         this.appUserRepository = appUserRepository;
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
+        this.otpRepository = otpRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.emailService = emailService;
         this.refreshTokenExpirationDays = refreshTokenExpirationDays;
+        this.otpExpirationMinutes = otpExpirationMinutes;
     }
+
+    private final long otpExpirationMinutes;
 
     @Transactional
     public AuthTokenResponse register(AuthRegisterRequest request) {
@@ -91,6 +109,86 @@ public class AuthService {
         user = appUserRepository.save(user);
 
         return issueTokens(user);
+    }
+
+    @Transactional
+    public OtpResponse forgotPassword(ForgotPasswordRequest request) {
+        String email = request.email().trim().toLowerCase();
+        AppUser user = appUserRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Clean up existing OTPs for this user
+        otpRepository.deleteByEmailAndType(email, OtpType.FORGOT_PASSWORD);
+
+        // Generate new OTP
+        String otpCode = generateOtpCode();
+        Instant expiresAt = Instant.now().plusSeconds(otpExpirationMinutes * 60);
+
+        Otp otp = new Otp(email, otpCode, expiresAt, OtpType.FORGOT_PASSWORD, user.getId().toString());
+        otp = otpRepository.save(otp);
+
+        // Send OTP via email
+        emailService.sendOtpEmail(email, otpCode, "Password Reset");
+
+        return new OtpResponse(email, "FORGOT_PASSWORD", expiresAt, false);
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        String email = request.email().trim().toLowerCase();
+        String code = request.code();
+        String newPassword = request.newPassword();
+
+        Otp otp = otpRepository.findByEmailAndCodeAndType(email, code, OtpType.FORGOT_PASSWORD)
+                .orElseThrow(() -> new BadRequestException("Invalid OTP"));
+
+        if (otp.isUsed()) {
+            throw new BadRequestException("OTP has already been used");
+        }
+
+        if (otp.getExpiresAt().isBefore(Instant.now())) {
+            throw new BadRequestException("OTP has expired");
+        }
+
+        AppUser user = appUserRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        appUserRepository.save(user);
+
+        otp.setUsed(true);
+        otpRepository.save(otp);
+
+        // Revoke all refresh tokens for this user
+        refreshTokenRepository.deleteByUser(user);
+    }
+
+    @Transactional
+    public OtpResponse verifyOtp(VerifyOtpRequest request) {
+        String email = request.email().trim().toLowerCase();
+        String code = request.code();
+        OtpType type = OtpType.valueOf(request.type().toUpperCase());
+
+        Otp otp = otpRepository.findByEmailAndCodeAndType(email, code, type)
+                .orElseThrow(() -> new BadRequestException("Invalid OTP"));
+
+        if (otp.isUsed()) {
+            throw new BadRequestException("OTP has already been used");
+        }
+
+        if (otp.getExpiresAt().isBefore(Instant.now())) {
+            throw new BadRequestException("OTP has expired");
+        }
+
+        otp.setUsed(true);
+        otp = otpRepository.save(otp);
+
+        return new OtpResponse(email, type.name(), otp.getExpiresAt(), true);
+    }
+
+    private String generateOtpCode() {
+        // Generate 6-digit OTP
+        return String.format("%06d", (int) (Math.random() * 1000000));
     }
 
     @Transactional

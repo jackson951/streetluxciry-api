@@ -13,8 +13,10 @@ import com.jackson.demo.model.UserRole;
 import com.jackson.demo.repository.AppUserRepository;
 import com.jackson.demo.repository.CartRepository;
 import com.jackson.demo.repository.CustomerRepository;
+import com.jackson.demo.repository.OtpRepository;
 import com.jackson.demo.repository.RefreshTokenRepository;
 import com.jackson.demo.security.JwtService;
+import com.jackson.demo.service.EmailService;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -43,10 +45,16 @@ class AuthServiceTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
+    private OtpRepository otpRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
     private AuthenticationManager authenticationManager;
+
+    @Mock
+    private EmailService emailService;
 
     @SuppressWarnings("null")
 @Test
@@ -55,11 +63,14 @@ class AuthServiceTest {
                 appUserRepository,
                 customerRepository,
                 cartRepository,
+                otpRepository,
                 refreshTokenRepository,
                 passwordEncoder,
                 authenticationManager,
                 new JwtService("bnlMdkdzbnN4Y3B2eTQ5d2VoM3dwY2VmMXVjaXJiYmxzNTRmYmhoN2x1dXFxZWY5ZA==", 30),
-                14);
+                emailService,
+                14,
+                10);
 
         AppUser admin = new AppUser();
         ReflectionTestUtils.setField(admin, "id", UUID.randomUUID());
@@ -87,11 +98,14 @@ class AuthServiceTest {
                 appUserRepository,
                 customerRepository,
                 cartRepository,
+                otpRepository,
                 refreshTokenRepository,
                 passwordEncoder,
                 authenticationManager,
                 new JwtService("bnlMdkdzbnN4Y3B2eTQ5d2VoM3dwY2VmMXVjaXJiYmxzNTRmYmhoN2x1dXFxZWY5ZA==", 30),
-                14);
+                emailService,
+                14,
+                10);
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("bad creds"));
