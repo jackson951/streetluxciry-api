@@ -142,9 +142,9 @@ public class AuthService {
         Otp otp = otpRepository.findByEmailAndCodeAndType(email, code, OtpType.FORGOT_PASSWORD)
                 .orElseThrow(() -> new BadRequestException("Invalid OTP"));
 
-        if (otp.isUsed()) {
-            throw new BadRequestException("OTP has already been used");
-        }
+        // if (otp.isUsed()) {
+        //     throw new BadRequestException("OTP has already been used");
+        // }
 
         if (otp.getExpiresAt().isBefore(Instant.now())) {
             throw new BadRequestException("OTP has expired");
