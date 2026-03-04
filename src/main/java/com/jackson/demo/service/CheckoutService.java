@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CheckoutService {
 
     private static final int SESSION_TTL_MINUTES = 15;
+    private static final BigDecimal DELIVERY_FEE = new BigDecimal("350.00");
 
     private final CartService cartService;
     private final CustomerService customerService;
@@ -101,7 +102,18 @@ public class CheckoutService {
             total = total.add(subtotal);
         }
 
-        session.setTotalAmount(total);
+        // Calculate delivery fee if applicable
+        BigDecimal deliveryFee = BigDecimal.ZERO;
+        if (request != null && request.isDelivery() != null && request.isDelivery()) {
+            deliveryFee = DELIVERY_FEE;
+        }
+        
+        BigDecimal finalTotal = total.add(deliveryFee);
+        session.setTotalAmount(finalTotal);
+        session.setDeliveryFee(deliveryFee);
+        session.setIsDelivery(request != null && request.isDelivery() != null && request.isDelivery());
+        session.setShippingAddress(request != null ? request.shippingAddress() : null);
+        
         if (request != null && request.preferredPaymentMethodId() != null) {
             validatePaymentMethodOwnership(request.preferredPaymentMethodId(), customerId);
         }
@@ -229,6 +241,9 @@ public class CheckoutService {
         }
 
         order.setTotalAmount(total);
+        order.setDeliveryFee(session.getDeliveryFee());
+        order.setIsDelivery(session.getIsDelivery());
+        order.setShippingAddress(session.getShippingAddress());
         CustomerOrder savedOrder = customerOrderRepository.save(order);
 
         approvedTransaction.setOrder(savedOrder);

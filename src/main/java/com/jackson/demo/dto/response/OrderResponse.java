@@ -11,6 +11,9 @@ public record OrderResponse(
         String orderNumber,
         OrderStatus status,
         BigDecimal totalAmount,
+        BigDecimal deliveryFee,
+        Boolean isDelivery,
+        String shippingAddress,
         Instant createdAt,
         UUID customerId,
         List<OrderItemResponse> items) {

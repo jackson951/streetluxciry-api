@@ -41,8 +41,17 @@ public class CheckoutSession {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(precision = 12, scale = 2)
+    private BigDecimal deliveryFee;
+
     @Column(nullable = false, length = 10)
     private String currency = "USD";
+
+    @Column
+    private Boolean isDelivery;
+
+    @Column(length = 400)
+    private String shippingAddress;
 
     @Column(nullable = false)
     private Instant expiresAt;
@@ -142,5 +151,29 @@ public class CheckoutSession {
 
     public List<CheckoutSessionItem> getItems() {
         return items;
+    }
+
+    public BigDecimal getDeliveryFee() {
+        return deliveryFee;
+    }
+
+    public void setDeliveryFee(BigDecimal deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public Boolean getIsDelivery() {
+        return isDelivery;
+    }
+
+    public void setIsDelivery(Boolean isDelivery) {
+        this.isDelivery = isDelivery;
+    }
+
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
     }
 }

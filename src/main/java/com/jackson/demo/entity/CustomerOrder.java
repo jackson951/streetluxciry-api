@@ -43,6 +43,15 @@ public class CustomerOrder {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal deliveryFee;
+
+    @Column
+    private Boolean isDelivery;
+
+    @Column(length = 400)
+    private String shippingAddress;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -96,5 +105,29 @@ public class CustomerOrder {
 
     public List<OrderItem> getItems() {
         return items;
+    }
+
+    public BigDecimal getDeliveryFee() {
+        return deliveryFee;
+    }
+
+    public void setDeliveryFee(BigDecimal deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public Boolean getIsDelivery() {
+        return isDelivery;
+    }
+
+    public void setIsDelivery(Boolean isDelivery) {
+        this.isDelivery = isDelivery;
+    }
+
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
     }
 }

@@ -103,6 +103,9 @@ public class OrderService {
                 order.getId(),
                 order.getOrderNumber(),
                 order.getStatus(),
+                order.getDeliveryFee(),
+                order.getIsDelivery(),
+                order.getShippingAddress(),
                 order.getCreatedAt(),
                 stages);
     }

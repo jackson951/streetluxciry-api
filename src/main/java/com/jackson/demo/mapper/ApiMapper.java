@@ -72,6 +72,9 @@ public final class ApiMapper {
                 order.getOrderNumber(),
                 order.getStatus(),
                 order.getTotalAmount(),
+                order.getDeliveryFee(),
+                order.getIsDelivery(),
+                order.getShippingAddress(),
                 order.getCreatedAt(),
                 order.getCustomer().getId(),
                 items);
