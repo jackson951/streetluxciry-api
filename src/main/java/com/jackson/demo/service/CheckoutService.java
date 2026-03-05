@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CheckoutService {
 
     private static final int SESSION_TTL_MINUTES = 15;
-    private static final BigDecimal DELIVERY_FEE = new BigDecimal("350.00");
+    private static final BigDecimal DELIVERY_FEE = new BigDecimal("18.92"); // 350 rands / 18.5 = ~18.92 dollars
 
     private final CartService cartService;
     private final CustomerService customerService;
@@ -232,8 +232,11 @@ public class CheckoutService {
             product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
             productRepository.save(product);
         }
+        // Note: Delivery fee is already included in session.getTotalAmount()
+        // which was calculated in createSession method, so we don't add it again here
+
         if(session.getIsDelivery()){
-         total=total.add(DELIVERY_FEE);
+            total=total.add(DELIVERY_FEE);
         }
 
         if (session.getTotalAmount().compareTo(total) != 0) {
