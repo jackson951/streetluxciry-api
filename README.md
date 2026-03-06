@@ -18,8 +18,8 @@ This project is a RESTful API built using Spring Boot, designed to handle variou
 ## Setup Instructions
 1. Clone the repository: 
    ```bash
-   git clone https://github.com/jackson951/springBoot-e-commerce-api.git
-   cd springBoot-e-commerce-api
+   https://github.com/jackson951/api.streetluxciry.git
+   cd api.streetluxciry
    ```
 2. Update application properties with your database credentials in `src/main/resources/application.properties`.
 3. Run the application: 
