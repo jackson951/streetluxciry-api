@@ -1,4 +1,4 @@
-# Spring Boot E-Commerce API
+#StreetLuxCity API
 
 ## Project Overview
 This project is a RESTful API built using Spring Boot, designed to handle various e-commerce functionalities such as product management, user authentication, and order processing.
