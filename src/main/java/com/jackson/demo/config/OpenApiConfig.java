@@ -16,10 +16,10 @@ public class OpenApiConfig {
     public OpenAPI ecommerceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("E-Commerce API")
+                        .title("StreetLuxCity API")
                         .description("Complete e-commerce backend API with products, categories, customers, carts, and orders.")
                         .version("v1")
-                        .contact(new Contact().name("API Support").email("support@example.com"))
+                        .contact(new Contact().name("API Support").email("support@streeluxcity.shop"))
                         .license(new License().name("Apache 2.0")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .schemaRequirement("bearerAuth", new SecurityScheme()
